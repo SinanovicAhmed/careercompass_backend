@@ -23,19 +23,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
-    public User signUp(SignUpRequest signUpRequest) {
-        Optional<User> existingUser = userRepository.findByUsername(signUpRequest.getUsername());
-
-        if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("User with username " + signUpRequest.getUsername() + " already exists");
-        }
-
+    public Boolean signUpSuccesful(SignUpRequest signUpRequest) {
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setRole(signUpRequest.getRole());
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        return savedUser.getId() != null;
     }
 
     public JwtAuthenticationResponse signIn(SignInRequest signInRequest) {
@@ -70,5 +66,18 @@ public class AuthService {
         }
 
         return null;
+    }
+
+    public boolean usernameExists(String username) {
+        Optional<User> existingUser = userRepository.findByUsername(username);
+        return existingUser.isPresent();
+    }
+
+    public boolean userAuthenticated(String username, String password) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            return passwordEncoder.matches(password, user.get().getPassword());
+        }
+        return false;
     }
 }
