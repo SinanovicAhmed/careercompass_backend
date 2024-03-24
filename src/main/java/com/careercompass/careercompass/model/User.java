@@ -1,6 +1,5 @@
 package com.careercompass.careercompass.model;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +21,9 @@ public class User implements UserDetails {
     private String username;
     private String password;
     private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private ApplicantDetails applicantDetails;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

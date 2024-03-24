@@ -4,7 +4,9 @@ import com.careercompass.careercompass.dto.RefreshTokenRequest;
 import com.careercompass.careercompass.dto.SignInRequest;
 import com.careercompass.careercompass.dto.JwtAuthenticationResponse;
 import com.careercompass.careercompass.dto.SignUpRequest;
+import com.careercompass.careercompass.model.ApplicantDetails;
 import com.careercompass.careercompass.model.User;
+import com.careercompass.careercompass.repository.ApplicantDetailsRepository;
 import com.careercompass.careercompass.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +24,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+    private final ApplicantDetailsRepository applicantDetailsRepository;
 
     public Boolean signUpSuccesful(SignUpRequest signUpRequest) {
         User user = new User();
@@ -31,7 +34,11 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        return savedUser.getId() != null;
+        ApplicantDetails applicantDetails = new ApplicantDetails();
+        applicantDetails.setUser(savedUser); // Set the user
+        ApplicantDetails savedApplicantDetails = applicantDetailsRepository.save(applicantDetails);
+
+        return savedUser.getId() != null && savedApplicantDetails.getId() != null;
     }
 
     public JwtAuthenticationResponse signIn(SignInRequest signInRequest) {
