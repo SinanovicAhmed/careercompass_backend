@@ -1,10 +1,12 @@
 package com.careercompass.careercompass.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApplicantDetailsResponseDTO {
         private String firstname;
         private String lastname;
