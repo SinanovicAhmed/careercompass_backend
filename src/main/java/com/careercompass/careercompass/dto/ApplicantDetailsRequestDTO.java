@@ -1,6 +1,7 @@
 package com.careercompass.careercompass.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,11 +9,11 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ApplicantDetailsRequestDTO {
-    @NotBlank
+    @NotBlank(message = "firstname is required")
     private String firstname;
-    @NotBlank
+    @NotBlank(message = "lastname is required")
     private String lastname;
-    @NotBlank
-    @Pattern(regexp="^\\+(?:[0-9] ?){6,14}[0-9]$", message="Invalid phone number format")
+    @NotBlank(message = "phoneNumber is required")
+    @Pattern(regexp="^\\+(?:[0-9] ?){6,14}[0-9]$", message="phoneNumber is in invalid format")
     private String phoneNumber;
 }
