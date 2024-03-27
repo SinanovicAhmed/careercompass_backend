@@ -5,9 +5,13 @@ import com.careercompass.careercompass.dto.SignInRequest;
 import com.careercompass.careercompass.dto.JwtAuthenticationResponse;
 import com.careercompass.careercompass.dto.SignUpRequest;
 import com.careercompass.careercompass.model.ApplicantDetails;
+import com.careercompass.careercompass.model.CompanyDetails;
+import com.careercompass.careercompass.model.Role;
 import com.careercompass.careercompass.model.User;
 import com.careercompass.careercompass.repository.ApplicantDetailsRepository;
+import com.careercompass.careercompass.repository.CompanyDetailsRepository;
 import com.careercompass.careercompass.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +29,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
     private final ApplicantDetailsRepository applicantDetailsRepository;
+    private final CompanyDetailsRepository companyDetailsRepository;
 
+    @Transactional
     public Boolean signUpSuccesful(SignUpRequest signUpRequest) {
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
@@ -34,11 +40,19 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        ApplicantDetails applicantDetails = new ApplicantDetails();
-        applicantDetails.setUser(savedUser); // Set the user
-        ApplicantDetails savedApplicantDetails = applicantDetailsRepository.save(applicantDetails);
+        if(signUpRequest.getRole() == Role.USER) {
+            ApplicantDetails applicantDetails = new ApplicantDetails();
+            applicantDetails.setUser(savedUser);
+            ApplicantDetails savedApplicantDetails = applicantDetailsRepository.save(applicantDetails);
 
-        return savedUser.getId() != null && savedApplicantDetails.getId() != null;
+            return savedUser.getId() != null && savedApplicantDetails.getId() != null;
+        }else {
+            CompanyDetails companyDetails = new CompanyDetails();
+            companyDetails.setUser(savedUser);
+            CompanyDetails savedCompanyDetails = companyDetailsRepository.save(companyDetails);
+
+            return savedUser.getId() != null && savedCompanyDetails.getId() != null;
+        }
     }
 
     public JwtAuthenticationResponse signIn(SignInRequest signInRequest) {
