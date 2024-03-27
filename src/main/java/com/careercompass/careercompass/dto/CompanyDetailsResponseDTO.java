@@ -15,5 +15,5 @@ public class CompanyDetailsResponseDTO {
     private String about;
     private String websiteUrl;
     private Integer numberOfEmployees;
-    private List<CityResponseDTO> cities;
+    private List<String> cities;
 }

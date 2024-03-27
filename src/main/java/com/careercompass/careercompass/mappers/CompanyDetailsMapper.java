@@ -2,6 +2,7 @@ package com.careercompass.careercompass.mappers;
 
 import com.careercompass.careercompass.dto.CityResponseDTO;
 import com.careercompass.careercompass.dto.CompanyDetailsResponseDTO;
+import com.careercompass.careercompass.model.City;
 import com.careercompass.careercompass.model.CompanyDetails;
 import org.springframework.stereotype.Component;
 
@@ -22,11 +23,11 @@ public class CompanyDetailsMapper {
         companyDetailsResponseDTO.setWebsiteUrl(companyDetails.getWebsiteUrl());
         companyDetailsResponseDTO.setNumberOfEmployees(companyDetails.getNumberOfEmployees());
 
-        List<CityResponseDTO> cityResponseDTOs = companyDetails.getCities().stream()
-                .map(city -> new CityResponseDTO(city.getName()))
+        List<String> cities = companyDetails.getCities().stream()
+                .map(City::getName)
                 .toList();
 
-        companyDetailsResponseDTO.setCities(cityResponseDTOs);
+        companyDetailsResponseDTO.setCities(cities);
 
         return companyDetailsResponseDTO;
     }

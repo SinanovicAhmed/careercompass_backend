@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,10 +39,13 @@ public class CompanyDetailsService {
         companyDetails.setWebsiteUrl(newCompanyDetails.getWebsiteUrl());
         companyDetails.setNumberOfEmployees(newCompanyDetails.getNumberOfEmployees());
 
-        List<City> cities = newCompanyDetails.getCityIds().stream()
-                .map(cityId -> cityRepository.findById(cityId)
-                        .orElseThrow(() -> new EntityNotFoundException("City with ID " + cityId + " not found")))
-                .collect(Collectors.toList());
+        List<City> cities = new ArrayList<>();
+        if (newCompanyDetails.getCityIds() != null) {
+            cities = newCompanyDetails.getCityIds().stream()
+                    .map(cityId -> cityRepository.findById(cityId)
+                            .orElseThrow(() -> new EntityNotFoundException("City with ID " + cityId + " not found")))
+                    .collect(Collectors.toList());
+        }
 
         companyDetails.setCities(cities);
 

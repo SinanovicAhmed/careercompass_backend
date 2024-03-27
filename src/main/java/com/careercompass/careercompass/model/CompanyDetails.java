@@ -1,13 +1,16 @@
 package com.careercompass.careercompass.model;
 
-import com.careercompass.careercompass.dto.CityResponseDTO;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "company_details")
 public class CompanyDetails {
     @Id
