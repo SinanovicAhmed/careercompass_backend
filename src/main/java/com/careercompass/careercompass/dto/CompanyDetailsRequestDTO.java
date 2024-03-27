@@ -15,23 +15,23 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyDetailsRequestDTO {
-    @NotBlank
+    @NotBlank(message = "name is required")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "slogan is required")
     private String slogan;
 
-    @NotBlank
+    @NotBlank(message = "about is required")
     private String about;
 
-    @NotBlank
+    @NotBlank(message = "websiteUrl is required")
     private String websiteUrl;
 
-    @NotNull
+    @NotNull(message = "numberOfEmployees is required")
     private Integer numberOfEmployees;
 
     @Valid
-    @NotNull
-    @Size(max = 5)
+    @NotNull(message = "list of city ids is required")
+    @Size(max = 5, message = "number of city ids must not exceed 5")
     private List<Integer> cityIds;
 }
