@@ -22,14 +22,14 @@ class CompanyDetailsMapperTest {
         cities.add(new City(2, "CityName2", new ArrayList<>()));
 
         CompanyDetails companyDetails = new CompanyDetails(
-            1,
-            "companyName",
-            "companySlogan",
-            "companyAbout",
-            "companyWebsite",
-            4,
-            cities,
-            new User()
+                1,
+                "companyName",
+                "companySlogan",
+                "companyAbout",
+                "companyWebsite",
+                4,
+                cities,
+                new User()
         );
 
         CompanyDetailsResponseDTO expectedResult = new CompanyDetailsResponseDTO(
