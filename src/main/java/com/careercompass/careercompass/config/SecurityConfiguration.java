@@ -5,6 +5,7 @@ import com.careercompass.careercompass.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -28,11 +29,12 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request.requestMatchers("/api/v1/auth/**", "/error")
-                        .permitAll()
-                        .requestMatchers("/api/v1/admin").hasAnyAuthority(Role.ADMIN.name())
-                        .requestMatchers("/api/v1/user").hasAnyAuthority(Role.USER.name())
-                        .requestMatchers("/api/v1/applicant").hasAuthority(Role.USER.name())
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/api/v1/auth/**", "/error").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/company/details/**").hasAuthority(Role.COMPANY.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/applicant/details/**").hasAuthority(Role.APPLICANT.name())
+                        .requestMatchers(HttpMethod.GET, "/api/v1/applicant/details/**").hasAnyAuthority(Role.APPLICANT.name(), Role.COMPANY.name())
+                        .requestMatchers(HttpMethod.GET, "/api/v1/company/details/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore

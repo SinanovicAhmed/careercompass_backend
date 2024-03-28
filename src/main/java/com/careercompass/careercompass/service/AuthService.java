@@ -40,7 +40,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        if(signUpRequest.getRole() == Role.USER) {
+        if(signUpRequest.getRole() == Role.APPLICANT) {
             ApplicantDetails applicantDetails = new ApplicantDetails();
             applicantDetails.setUser(savedUser);
             ApplicantDetails savedApplicantDetails = applicantDetailsRepository.save(applicantDetails);
