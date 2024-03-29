@@ -2,8 +2,11 @@ package com.careercompass.careercompass.service;
 
 import com.careercompass.careercompass.dto.CompanyDetailsRequestDTO;
 import com.careercompass.careercompass.dto.CompanyDetailsResponseDTO;
+import com.careercompass.careercompass.exception.UnauthorizedToUpdateException;
 import com.careercompass.careercompass.mappers.CompanyDetailsMapper;
+import com.careercompass.careercompass.model.City;
 import com.careercompass.careercompass.model.CompanyDetails;
+import com.careercompass.careercompass.model.User;
 import com.careercompass.careercompass.repository.CompanyDetailsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +16,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompanyDetailsServiceTest {
     CompanyDetails companyDetails;
+    CompanyDetails companyDetailsFilled;
     CompanyDetailsResponseDTO companyDetailsResponseDTO;
     CompanyDetailsRequestDTO companyDetailsRequestDTO;
 
@@ -29,12 +34,25 @@ class CompanyDetailsServiceTest {
     @Mock
     private CompanyDetailsMapper companyDetailsMapper;
 
+    @Mock
+    private AuthorizeUser authorizeUser;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         companyDetails = new CompanyDetails();
         companyDetailsResponseDTO = new CompanyDetailsResponseDTO();
         companyDetailsRequestDTO = new CompanyDetailsRequestDTO();
+        companyDetailsFilled = new CompanyDetails(
+                1,
+                "Company Name",
+                "Slogan",
+                "About",
+                "http://example.com",
+                100,
+                List.of(new City(), new City()),
+                new User()
+        );
     }
 
     @Test
@@ -59,17 +77,31 @@ class CompanyDetailsServiceTest {
     }
 
     @Test
-    void testUpdateByUserID_WhenCompanyIsFound() {
-        Mockito.when(companyDetailsRepository.findByUserId(1)).thenReturn(Optional.of(companyDetails));
-        Mockito.when(companyDetailsRepository.save(companyDetails)).thenReturn(companyDetails);
-        Mockito.when(companyDetailsMapper.mapToCompanyDetailsResponseDTO(companyDetails)).thenReturn(companyDetailsResponseDTO);
+    void testUpdateByUserID_WhenCompanyIsFound_WhenAuthorizedToUpdate() {
+        Mockito.when(companyDetailsRepository.findByUserId(1)).thenReturn(Optional.of(companyDetailsFilled));
+        Mockito.when(companyDetailsRepository.save(companyDetailsFilled)).thenReturn(companyDetailsFilled);
+        Mockito.when(companyDetailsMapper.mapToCompanyDetailsResponseDTO(companyDetailsFilled)).thenReturn(companyDetailsResponseDTO);
+        Mockito.when(authorizeUser.isAuthorizedForChange(null)).thenReturn(true);
 
         CompanyDetailsResponseDTO result = companyDetailsService.updateByUserID(1, companyDetailsRequestDTO);
 
         assertEquals(result, companyDetailsResponseDTO);
         Mockito.verify(companyDetailsRepository, Mockito.times(1)).findByUserId(1);
-        Mockito.verify(companyDetailsRepository, Mockito.times(1)).save(companyDetails);
-        Mockito.verify(companyDetailsMapper, Mockito.times(1)).mapToCompanyDetailsResponseDTO(companyDetails);
+        Mockito.verify(authorizeUser, Mockito.times(1)).isAuthorizedForChange(null);
+        Mockito.verify(companyDetailsRepository, Mockito.times(1)).save(companyDetailsFilled);
+        Mockito.verify(companyDetailsMapper, Mockito.times(1)).mapToCompanyDetailsResponseDTO(companyDetailsFilled);
+    }
+
+    @Test
+    void testUpdateByUserID_WhenCompanyIsFound_WhenNotAuthorizedToUpdate() {
+        Mockito.when(companyDetailsRepository.findByUserId(1)).thenReturn(Optional.of(companyDetailsFilled));
+        Mockito.when(authorizeUser.isAuthorizedForChange(null)).thenReturn(false);
+
+        assertThrows(UnauthorizedToUpdateException.class, () -> companyDetailsService.updateByUserID(1, companyDetailsRequestDTO));
+        Mockito.verify(companyDetailsRepository, Mockito.times(1)).findByUserId(1);
+        Mockito.verify(authorizeUser, Mockito.times(1)).isAuthorizedForChange(null);
+        Mockito.verify(companyDetailsRepository, Mockito.never()).save(companyDetailsFilled);
+        Mockito.verify(companyDetailsMapper, Mockito.never()).mapToCompanyDetailsResponseDTO(companyDetailsFilled);
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.careercompass.careercompass.service;
 
 import com.careercompass.careercompass.dto.ApplicantDetailsRequestDTO;
 import com.careercompass.careercompass.dto.ApplicantDetailsResponseDTO;
+import com.careercompass.careercompass.exception.UnauthorizedToUpdateException;
 import com.careercompass.careercompass.mappers.ApplicantDetailsMapper;
 import com.careercompass.careercompass.model.ApplicantDetails;
 import com.careercompass.careercompass.model.User;
@@ -19,10 +20,17 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApplicantDetailsServiceTest {
+    ApplicantDetails applicantDetailsFilled;
+    ApplicantDetails applicantDetails;
+    ApplicantDetailsResponseDTO applicantResponseDTO;
+    ApplicantDetailsRequestDTO applicantRequestDTO;
+
     @InjectMocks
     private ApplicantDetailsService applicantDetailsService;
     @Mock
     private ApplicantDetailsRepository applicantDetailsRepository;
+    @Mock
+    private AuthorizeUser authorizeUser;
     @Mock
     private ApplicantDetailsMapper applicantDetailsMapper;
 
@@ -30,38 +38,33 @@ class ApplicantDetailsServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    public void testFindByUserID_whenApplicantIsFound_returnApplicantDTO() {
-        ApplicantDetails applicantDetails = new ApplicantDetails(
-                2,
-                "Ahmed",
-                "Sinanovic",
+        applicantDetailsFilled = new ApplicantDetails(
+                1,
+                "name",
+                "surname",
                 "+387 61 242 525",
                 new User()
         );
 
-        ApplicantDetailsResponseDTO expectedResponseDTO = new ApplicantDetailsResponseDTO(
-                "Ahmed",
-                "Sinanovic",
-                "+387 61 242 525"
-        );
+        applicantDetails = new ApplicantDetails();
+        applicantResponseDTO = new ApplicantDetailsResponseDTO();
+        applicantRequestDTO = new ApplicantDetailsRequestDTO();
+    }
 
+    @Test
+    public void testFindByUserID_whenApplicantIsFound_returnApplicantDTO() {
         Mockito.when(applicantDetailsRepository.findByUserId(1)).thenReturn(Optional.of(applicantDetails));
-        Mockito.when(applicantDetailsMapper.mapToApplicantDetailsResponseDTO(applicantDetails)).thenReturn(expectedResponseDTO);
+        Mockito.when(applicantDetailsMapper.mapToApplicantDetailsResponseDTO(applicantDetails)).thenReturn(applicantResponseDTO);
 
-        ApplicantDetailsResponseDTO responseDTO = applicantDetailsService.findByUserID(1);
+        ApplicantDetailsResponseDTO result = applicantDetailsService.findByUserID(1);
 
-        assertEquals(expectedResponseDTO, responseDTO);
+        assertEquals(applicantResponseDTO, result);
         Mockito.verify(applicantDetailsRepository, Mockito.times(1)).findByUserId(1);
         Mockito.verify(applicantDetailsMapper, Mockito.times(1)).mapToApplicantDetailsResponseDTO(applicantDetails);
     }
 
     @Test
     public void testFindByUserID_whenApplicantIsNotFound_throwEntityNotFoundException() {
-        ApplicantDetails applicantDetails = new ApplicantDetails();
-
         Mockito.when(applicantDetailsRepository.findByUserId(1)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> applicantDetailsService.findByUserID(1));
@@ -71,53 +74,44 @@ class ApplicantDetailsServiceTest {
     }
 
     @Test
-    void testUpdateByUserID_WhenApplicantIsFound() {
-        // Arrange
-        ApplicantDetailsRequestDTO newApplicantDetails = new ApplicantDetailsRequestDTO(
-                "NewFirstName",
-                "NewLastName",
-                "+1234567890"
-        );
+    void testUpdateByUserID_WhenApplicantIsFound_WhenAuthorizedToUpdate() {
+        Mockito.when(applicantDetailsRepository.findByUserId(1)).thenReturn(Optional.of(applicantDetailsFilled));
+        Mockito.when(applicantDetailsRepository.save(applicantDetailsFilled)).thenReturn(applicantDetailsFilled);
+        Mockito.when(applicantDetailsMapper.mapToApplicantDetailsResponseDTO(applicantDetailsFilled)).thenReturn(applicantResponseDTO);
+        Mockito.when(authorizeUser.isAuthorizedForChange(null)).thenReturn(true);
 
-        ApplicantDetailsResponseDTO returnedApplicantDetails = new ApplicantDetailsResponseDTO(
-                "NewFirstName",
-                "NewLastName",
-                "+1234567890"
-        );
+        ApplicantDetailsResponseDTO result = applicantDetailsService.updateByUserID(1, applicantRequestDTO);
 
-        ApplicantDetails applicantDetails = new ApplicantDetails();
-        ApplicantDetails updatedApplicantDetails = new ApplicantDetails();
-
-        Mockito.when(applicantDetailsRepository.findByUserId(1)).thenReturn(Optional.of(applicantDetails));
-        Mockito.when(applicantDetailsRepository.save(applicantDetails)).thenReturn(updatedApplicantDetails);
-        Mockito.when(applicantDetailsMapper.mapToApplicantDetailsResponseDTO(updatedApplicantDetails)).thenReturn(returnedApplicantDetails);
-
-        ApplicantDetailsResponseDTO responseDTO = applicantDetailsService.updateByUserID(1, newApplicantDetails);
-
-        assertEquals(returnedApplicantDetails, responseDTO);
+        assertEquals(applicantResponseDTO, result);
 
         Mockito.verify(applicantDetailsRepository, Mockito.times(1)).findByUserId(1);
-        Mockito.verify(applicantDetailsRepository, Mockito.times(1)).save(applicantDetails);
-        Mockito.verify(applicantDetailsMapper, Mockito.times(1)).mapToApplicantDetailsResponseDTO(updatedApplicantDetails);
+        Mockito.verify(authorizeUser, Mockito.times(1)).isAuthorizedForChange(null);
+        Mockito.verify(applicantDetailsRepository, Mockito.times(1)).save(applicantDetailsFilled);
+        Mockito.verify(applicantDetailsMapper, Mockito.times(1)).mapToApplicantDetailsResponseDTO(applicantDetailsFilled);
+    }
+
+    @Test
+    void testUpdateByUserID_WhenApplicantIsFound_WhenNotAuthorizedToUpdate() {
+        Mockito.when(applicantDetailsRepository.findByUserId(1)).thenReturn(Optional.of(applicantDetailsFilled));
+        Mockito.when(authorizeUser.isAuthorizedForChange(null)).thenReturn(false);
+
+        assertThrows(UnauthorizedToUpdateException.class, () -> applicantDetailsService.updateByUserID(1, applicantRequestDTO));
+
+        Mockito.verify(applicantDetailsRepository, Mockito.times(1)).findByUserId(1);
+        Mockito.verify(authorizeUser, Mockito.times(1)).isAuthorizedForChange(null);
+        Mockito.verify(applicantDetailsRepository, Mockito.never()).save(applicantDetailsFilled);
+        Mockito.verify(applicantDetailsMapper, Mockito.never()).mapToApplicantDetailsResponseDTO(applicantDetailsFilled);
     }
 
     @Test
     void testUpdateByUserID_WhenApplicantIsNotFound_throwEntityNotFoundException() {
-        ApplicantDetailsRequestDTO newApplicantDetails = new ApplicantDetailsRequestDTO(
-                "NewFirstName",
-                "NewLastName",
-                "+1234567890"
-        );
-        ApplicantDetails applicantDetails = new ApplicantDetails();
-        ApplicantDetails updatedApplicantDetails = new ApplicantDetails();
-
         Mockito.when(applicantDetailsRepository.findByUserId(1)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> applicantDetailsService.updateByUserID(1, newApplicantDetails));
+        assertThrows(EntityNotFoundException.class, () -> applicantDetailsService.updateByUserID(1, applicantRequestDTO));
 
         Mockito.verify(applicantDetailsRepository, Mockito.times(1)).findByUserId(1);
         Mockito.verify(applicantDetailsRepository, Mockito.never()).save(applicantDetails);
-        Mockito.verify(applicantDetailsMapper, Mockito.never()).mapToApplicantDetailsResponseDTO(updatedApplicantDetails);
+        Mockito.verify(applicantDetailsMapper, Mockito.never()).mapToApplicantDetailsResponseDTO(applicantDetails);
     }
 
 }

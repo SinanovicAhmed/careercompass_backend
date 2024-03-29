@@ -1,6 +1,7 @@
 package com.careercompass.careercompass.service;
 
 import com.careercompass.careercompass.dto.*;
+import com.careercompass.careercompass.exception.UnauthorizedToUpdateException;
 import com.careercompass.careercompass.mappers.CompanyDetailsMapper;
 import com.careercompass.careercompass.model.City;
 import com.careercompass.careercompass.model.CompanyDetails;
@@ -21,6 +22,7 @@ public class CompanyDetailsService {
     private final CompanyDetailsRepository companyDetailsRepository;
     private final CityRepository cityRepository;
     private final CompanyDetailsMapper companyDetailsMapper;
+    private final AuthorizeUser authorizeUser;
 
     public CompanyDetailsResponseDTO findByUserID(Integer id) {
         CompanyDetails companyDetails = companyDetailsRepository.findByUserId(id)
@@ -32,6 +34,10 @@ public class CompanyDetailsService {
     public CompanyDetailsResponseDTO updateByUserID(Integer id, CompanyDetailsRequestDTO newCompanyDetails) {
         CompanyDetails companyDetails = companyDetailsRepository.findByUserId(id)
                 .orElseThrow(() -> new EntityNotFoundException("Details of company with ID " + id + " not found"));
+
+        if(!authorizeUser.isAuthorizedForChange(companyDetails.getUser().getUsername())) {
+            throw new UnauthorizedToUpdateException("You don't have permission to do update details of this user");
+        }
 
         companyDetails.setName(newCompanyDetails.getName());
         companyDetails.setSlogan(newCompanyDetails.getSlogan());

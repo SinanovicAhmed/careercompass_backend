@@ -25,8 +25,6 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<InvalidArgumentsErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors()
@@ -40,5 +38,16 @@ public class ApplicationExceptionHandler {
         );
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedToUpdateException.class)
+    public ResponseEntity<DefaultErrorResponse> handleUnauthorizedToUpdate(UnauthorizedToUpdateException ex) {
+        DefaultErrorResponse error = new DefaultErrorResponse();
+
+        error.setTimestamp(new Date().toString());
+        error.setMessage(ex.getMessage());
+        error.setStatus(401);
+
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 }
