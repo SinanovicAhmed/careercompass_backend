@@ -40,4 +40,7 @@ public class CompanyDetails {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @OneToMany(mappedBy = "companyDetails")
+    private List<CompanyReview> reviews;
 }

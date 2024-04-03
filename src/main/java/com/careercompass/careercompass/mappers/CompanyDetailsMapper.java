@@ -1,15 +1,21 @@
 package com.careercompass.careercompass.mappers;
 
-import com.careercompass.careercompass.dto.CityResponseDTO;
+
 import com.careercompass.careercompass.dto.CompanyDetailsResponseDTO;
+import com.careercompass.careercompass.dto.CompanyReviewResponseDTO;
 import com.careercompass.careercompass.model.City;
 import com.careercompass.careercompass.model.CompanyDetails;
+import com.careercompass.careercompass.model.CompanyReview;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class CompanyDetailsMapper {
+    private final CompanyReviewMapper companyReviewMapper;
+
     public CompanyDetailsResponseDTO mapToCompanyDetailsResponseDTO(CompanyDetails companyDetails) {
         if(companyDetails == null) {
             return null;
@@ -26,8 +32,12 @@ public class CompanyDetailsMapper {
         List<String> cities = companyDetails.getCities().stream()
                 .map(City::getName)
                 .toList();
-
         companyDetailsResponseDTO.setCities(cities);
+
+        List<CompanyReviewResponseDTO> reviews = companyDetails.getReviews().stream()
+                .map(companyReviewMapper::mapToCompanyReviewResponseDTO)
+                .toList();
+        companyDetailsResponseDTO.setReviews(reviews);
 
         return companyDetailsResponseDTO;
     }

@@ -16,4 +16,5 @@ public class CompanyDetailsResponseDTO {
     private String websiteUrl;
     private Integer numberOfEmployees;
     private List<String> cities;
+    private List<CompanyReviewResponseDTO> reviews;
 }
