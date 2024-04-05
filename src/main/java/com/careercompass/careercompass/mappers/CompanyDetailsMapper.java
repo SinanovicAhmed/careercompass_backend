@@ -14,8 +14,6 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class CompanyDetailsMapper {
-    private final CompanyReviewMapper companyReviewMapper;
-
     public CompanyDetailsResponseDTO mapToCompanyDetailsResponseDTO(CompanyDetails companyDetails) {
         if(companyDetails == null) {
             return null;
@@ -23,6 +21,7 @@ public class CompanyDetailsMapper {
 
         CompanyDetailsResponseDTO companyDetailsResponseDTO = new CompanyDetailsResponseDTO();
 
+        companyDetailsResponseDTO.setId(companyDetails.getId());
         companyDetailsResponseDTO.setName(companyDetails.getName());
         companyDetailsResponseDTO.setSlogan(companyDetails.getSlogan());
         companyDetailsResponseDTO.setAbout(companyDetails.getAbout());
@@ -33,11 +32,6 @@ public class CompanyDetailsMapper {
                 .map(City::getName)
                 .toList();
         companyDetailsResponseDTO.setCities(cities);
-
-        List<CompanyReviewResponseDTO> reviews = companyDetails.getReviews().stream()
-                .map(companyReviewMapper::mapToCompanyReviewResponseDTO)
-                .toList();
-        companyDetailsResponseDTO.setReviews(reviews);
 
         return companyDetailsResponseDTO;
     }

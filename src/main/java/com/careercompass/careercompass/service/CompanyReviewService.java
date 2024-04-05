@@ -60,7 +60,17 @@ public class CompanyReviewService {
         ApplicantDetails applicantDetails = applicantDetailsRepository.findById(review.getApplicant_id())
                 .orElseThrow(() -> new EntityNotFoundException("Applicant details not found"));
 
-        CompanyReview companyReview = setCompanyReview(review, companyDetails, applicantDetails);
+        CompanyReview companyReview = new CompanyReview(
+                review.getPositives(),
+                review.getNegatives(),
+                review.getCompensation_rating(),
+                review.getManagement_rating(),
+                review.getBenefits_rating(),
+                review.getCommunication_rating(),
+                review.getCareergrowth_rating(),
+                companyDetails,
+                applicantDetails
+        );
         CompanyReview savedReview = companyReviewRepository.save(companyReview);
 
         return companyReviewMapper.mapToCompanyReviewResponseDTO(savedReview);
@@ -82,22 +92,5 @@ public class CompanyReviewService {
             return "Something went wrong. Review with id " + reviewId + "is not deleted";
         }
         return "You successfully deleted review with id " + reviewId;
-    }
-
-
-
-
-    private static CompanyReview setCompanyReview(CompanyReviewRequestDTO review, CompanyDetails companyDetails, ApplicantDetails applicantDetails) {
-        CompanyReview companyReview = new CompanyReview();
-        companyReview.setPositive(review.getPositives());
-        companyReview.setNegative(review.getNegatives());
-        companyReview.setBenefits_rating(review.getBenefits_rating());
-        companyReview.setCareergrowth_rating(review.getCareergrowth_rating());
-        companyReview.setCompensation_rating(review.getCompensation_rating());
-        companyReview.setManagement_rating(review.getManagement_rating());
-        companyReview.setCommunication_rating(review.getCommunication_rating());
-        companyReview.setCompanyDetails(companyDetails);
-        companyReview.setApplicantDetails(applicantDetails);
-        return companyReview;
     }
 }

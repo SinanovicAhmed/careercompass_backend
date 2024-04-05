@@ -10,11 +10,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyDetailsResponseDTO {
+    private Integer id;
     private String name;
     private String slogan;
     private String about;
     private String websiteUrl;
     private Integer numberOfEmployees;
     private List<String> cities;
-    private List<CompanyReviewResponseDTO> reviews;
 }
