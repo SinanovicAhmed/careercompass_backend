@@ -25,6 +25,7 @@ public class CompanyReviewService {
     private final CompanyDetailsRepository companyDetailsRepository;
     private final ApplicantDetailsRepository applicantDetailsRepository;
     private final AuthorizeUser authorizeUser;
+
     public List<CompanyReviewResponseDTO> getReviewsByCompanyDetailsId(Integer companyDetailsId) {
         if (!companyDetailsRepository.existsById(companyDetailsId)) {
             throw new EntityNotFoundException("Company with ID " + companyDetailsId + " does not exist");
@@ -86,10 +87,8 @@ public class CompanyReviewService {
 
         companyReviewRepository.deleteById(reviewId);
 
-        Optional<CompanyReview> deletedReviewOptional = companyReviewRepository.findById(reviewId);
-
-        if (deletedReviewOptional.isPresent()){
-            return "Something went wrong. Review with id " + reviewId + "is not deleted";
+        if (companyReviewRepository.existsById(reviewId)){
+            return "Something went wrong. Review with id " + reviewId + " is not deleted";
         }
         return "You successfully deleted review with id " + reviewId;
     }
