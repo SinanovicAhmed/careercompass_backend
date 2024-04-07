@@ -39,6 +39,7 @@ public class CompanyReviewService {
 
         return responseReviews;
     }
+
     public List<CompanyReviewResponseDTO> getReviewsByApplicantDetailsId(Integer applicantDetailsId) {
         if (!applicantDetailsRepository.existsById(applicantDetailsId)) {
             throw new EntityNotFoundException("Applicant with ID " + applicantDetailsId + " does not exist");
@@ -52,7 +53,6 @@ public class CompanyReviewService {
 
         return responseReviews;
     }
-
 
     public CompanyReviewResponseDTO addCompanyReview(Integer companyDetailsId, CompanyReviewRequestDTO review) {
         CompanyDetails companyDetails = companyDetailsRepository.findById(companyDetailsId)

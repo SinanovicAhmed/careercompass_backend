@@ -11,16 +11,16 @@ public class CompanyReviewMapper {
             return null;
         }
 
-        CompanyReviewResponseDTO companyReviewResponseDTO = new CompanyReviewResponseDTO();
-
-        companyReviewResponseDTO.setId(companyReview.getId());
-        companyReviewResponseDTO.setPositive(companyReview.getPositive());
-        companyReviewResponseDTO.setNegative(companyReview.getNegative());
-        companyReviewResponseDTO.setBenefits_rating(companyReview.getBenefits_rating());
-        companyReviewResponseDTO.setCareergrowth_rating(companyReview.getCareergrowth_rating());
-        companyReviewResponseDTO.setCompensation_rating(companyReview.getCompensation_rating());
-        companyReviewResponseDTO.setManagement_rating(companyReview.getManagement_rating());
-        companyReviewResponseDTO.setCommunication_rating(companyReview.getCommunication_rating());
+        CompanyReviewResponseDTO companyReviewResponseDTO = new CompanyReviewResponseDTO(
+                companyReview.getId(),
+                companyReview.getPositive(),
+                companyReview.getNegative(),
+                companyReview.getBenefits_rating(),
+                companyReview.getCareergrowth_rating(),
+                companyReview.getCompensation_rating(),
+                companyReview.getManagement_rating(),
+                companyReview.getCommunication_rating()
+        );
 
         return companyReviewResponseDTO;
     }

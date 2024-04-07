@@ -34,8 +34,7 @@ public class CompanyReviewController {
     }
 
     @DeleteMapping("/delete/{reviewId}")
-    public ResponseEntity<String> deleteCompanyReview
-            (@PathVariable Integer reviewId) {
+    public ResponseEntity<String> deleteCompanyReview(@PathVariable Integer reviewId) {
         return new ResponseEntity<>(companyReviewService.deleteCompanyReview(reviewId), HttpStatus.OK);
     }
 }
