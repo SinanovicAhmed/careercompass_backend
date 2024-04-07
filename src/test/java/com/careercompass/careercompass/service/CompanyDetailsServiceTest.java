@@ -6,6 +6,7 @@ import com.careercompass.careercompass.exception.UnauthorizedToUpdateException;
 import com.careercompass.careercompass.mappers.CompanyDetailsMapper;
 import com.careercompass.careercompass.model.City;
 import com.careercompass.careercompass.model.CompanyDetails;
+import com.careercompass.careercompass.model.CompanyReview;
 import com.careercompass.careercompass.model.User;
 import com.careercompass.careercompass.repository.CompanyDetailsRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -51,7 +52,8 @@ class CompanyDetailsServiceTest {
                 "http://example.com",
                 100,
                 List.of(new City(), new City()),
-                new User()
+                new User(),
+                List.of(new CompanyReview())
         );
     }
 

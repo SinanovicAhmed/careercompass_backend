@@ -35,6 +35,9 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/applicant/details/**").hasAuthority(Role.APPLICANT.name())
                         .requestMatchers(HttpMethod.GET, "/api/v1/applicant/details/**").hasAnyAuthority(Role.APPLICANT.name(), Role.COMPANY.name())
                         .requestMatchers(HttpMethod.GET, "/api/v1/company/details/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/company/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/company/reviews/**").hasAuthority(Role.APPLICANT.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/company/reviews/**").hasAuthority(Role.APPLICANT.name())
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore

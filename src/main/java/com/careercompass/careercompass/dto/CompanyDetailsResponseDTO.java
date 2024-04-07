@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyDetailsResponseDTO {
+    private Integer id;
     private String name;
     private String slogan;
     private String about;
