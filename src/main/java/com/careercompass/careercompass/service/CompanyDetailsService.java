@@ -9,6 +9,9 @@ import com.careercompass.careercompass.repository.CityRepository;
 import com.careercompass.careercompass.repository.CompanyDetailsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,6 +32,29 @@ public class CompanyDetailsService {
                 .orElseThrow(() -> new EntityNotFoundException("Details of company with ID " + id + " not found"));
 
         return companyDetailsMapper.mapToCompanyDetailsResponseDTO(companyDetails);
+    }
+
+    public FilteredCompanyDetailsResponseDTO filterCompanies(String company_name, Integer cityId, Integer page) {
+        Pageable pageable = PageRequest.of(page, 20);
+        Page<CompanyDetails> filteredCompanies;
+
+        if (company_name != null && cityId != null) {
+            filteredCompanies = companyDetailsRepository.findByNameAndCity(company_name, cityId, pageable);
+        } else if (company_name != null) {
+            filteredCompanies = companyDetailsRepository.findByName(company_name, pageable);
+        } else if (cityId != null) {
+            filteredCompanies = companyDetailsRepository.findByCity(cityId, pageable);
+        } else {
+            filteredCompanies = companyDetailsRepository.findAll(pageable);
+        }
+
+        List<CompanyDetailsResponseDTO> companies = filteredCompanies.getContent().stream()
+                .map(companyDetailsMapper::mapToCompanyDetailsResponseDTO)
+                .collect(Collectors.toList());
+
+        boolean hasNextPage = filteredCompanies.hasNext();
+
+        return new FilteredCompanyDetailsResponseDTO(companies, hasNextPage);
     }
 
     public CompanyDetailsResponseDTO updateByUserID(Integer id, CompanyDetailsRequestDTO newCompanyDetails) {
