@@ -2,6 +2,7 @@ package com.careercompass.careercompass.service;
 
 import com.careercompass.careercompass.dto.CompanyDetailsRequestDTO;
 import com.careercompass.careercompass.dto.CompanyDetailsResponseDTO;
+import com.careercompass.careercompass.dto.FilteredCompanyDetailsResponseDTO;
 import com.careercompass.careercompass.exception.UnauthorizedToUpdateException;
 import com.careercompass.careercompass.mappers.CompanyDetailsMapper;
 import com.careercompass.careercompass.model.City;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 class CompanyDetailsServiceTest {
     CompanyDetails companyDetails;
@@ -116,4 +119,56 @@ class CompanyDetailsServiceTest {
         Mockito.verify(companyDetailsMapper, Mockito.never()).mapToCompanyDetailsResponseDTO(companyDetails);
     }
 
+    @Test
+    public void testFilterCompanies_whenNoFilterIsPassed_returnAllCompanies() {
+        Mockito.when(companyDetailsRepository.findAll(Mockito.any(Pageable.class)))
+                .thenReturn(Mockito.mock(Page.class));
+
+        companyDetailsService.filterCompanies(null, null, 0);
+
+        Mockito.verify(companyDetailsRepository, Mockito.times(1)).findAll(Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByCity(Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByNameAndCity(Mockito.anyString(), Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByName(Mockito.anyString(), Mockito.any(Pageable.class));
+    }
+
+    @Test
+    public void testFilterCompanies_whenCompanyNameIsPassed_returnFilteredCompaniesByName() {
+        Mockito.when(companyDetailsRepository.findByName(Mockito.anyString(), Mockito.any(Pageable.class)))
+                .thenReturn(Mockito.mock(Page.class));
+
+        companyDetailsService.filterCompanies("company_name", null, 0);
+
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findAll(Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByCity(Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByNameAndCity(Mockito.anyString(), Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.times(1)).findByName(Mockito.anyString(), Mockito.any(Pageable.class));
+    }
+
+    @Test
+    public void testFilterCompanies_whenCityIdIsPassed_returnFilteredCompaniesByCity() {
+
+        Mockito.when(companyDetailsRepository.findByCity(Mockito.anyInt(), Mockito.any(Pageable.class)))
+                .thenReturn(Mockito.mock(Page.class));
+
+        companyDetailsService.filterCompanies(null, 1, 0);
+
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findAll(Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.times(1)).findByCity(Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByNameAndCity(Mockito.anyString(), Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByName(Mockito.anyString(), Mockito.any(Pageable.class));
+    }
+
+    @Test
+    public void testFilterCompanies_whenAllFiltersArePassed_returnFilteredCompanies() {
+        Mockito.when(companyDetailsRepository.findByNameAndCity(Mockito.anyString(), Mockito.anyInt(), Mockito.any(Pageable.class)))
+                .thenReturn(Mockito.mock(Page.class));
+
+        companyDetailsService.filterCompanies("company_name", 1, 0);
+
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findAll(Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByCity(Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.times(1)).findByNameAndCity(Mockito.anyString(), Mockito.anyInt(), Mockito.any(Pageable.class));
+        Mockito.verify(companyDetailsRepository, Mockito.never()).findByName(Mockito.anyString(), Mockito.any(Pageable.class));
+    }
 }
